@@ -151,6 +151,15 @@ header p { color: var(--muted); }
 
 .suggest h2 { margin: 1rem 0 0.5rem; }
 
+/* History */
+.history { margin: 1rem 0 0.75rem; }
+.history-head { display: flex; align-items: center; justify-content: space-between; }
+.history-list { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
+.history-item { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); }
+.history-info .muted { display: block; color: var(--muted); font-size: 0.9rem; }
+.history-actions { display: flex; gap: 0.5rem; }
+.history-actions button { padding: 0.45rem 0.75rem; }
+
 .footer { margin-top: 2rem; color: var(--muted); text-align: center; }
 
 @media (max-width: 900px) {

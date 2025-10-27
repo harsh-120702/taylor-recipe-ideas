@@ -4,8 +4,10 @@ import { filterByIngredient, getMealDetails, type MealDetail, type MealListItem 
 
 const LS_LAST = 'tri:last'
 const LS_SETS = 'tri:sets'
+const LS_HISTORY = 'tri:history'
 
 type StoredLast = { ingredients: string[]; results: MealListItem[] }
+type HistoryEntry = { ts: number; ingredients: string[]; count: number; sample: MealListItem[] }
 
 function App() {
   // Ingredients as a list of tokens and an input for editing
@@ -24,6 +26,7 @@ function App() {
   // Suggestions and recent ingredient sets from previous sessions
   const [suggestions, setSuggestions] = useState<MealListItem[]>([])
   const [recentSets, setRecentSets] = useState<string[][]>([])
+  const [history, setHistory] = useState<HistoryEntry[]>([])
 
   const canSearch = ingredients.length > 0
 
@@ -45,6 +48,11 @@ function App() {
       if (rawSets) {
         const sets = JSON.parse(rawSets) as string[][]
         if (Array.isArray(sets)) setRecentSets(sets)
+      }
+      const rawHist = localStorage.getItem(LS_HISTORY)
+      if (rawHist) {
+        const hist = JSON.parse(rawHist) as HistoryEntry[]
+        if (Array.isArray(hist)) setHistory(hist)
       }
     } catch {
       // ignore storage errors
@@ -113,6 +121,17 @@ function App() {
         localStorage.setItem(LS_SETS, JSON.stringify(nextSets))
         setRecentSets(nextSets)
         setSuggestions(payload.results)
+
+        // Update history (max 10 entries)
+        const newEntry: HistoryEntry = {
+          ts: Date.now(),
+          ingredients,
+          count: result.length,
+          sample: result.slice(0, 6),
+        }
+        const nextHistory = [newEntry, ...history.filter((h) => h.ingredients.join(',') !== ingredients.join(','))].slice(0, 10)
+        localStorage.setItem(LS_HISTORY, JSON.stringify(nextHistory))
+        setHistory(nextHistory)
       } catch {
         // ignore storage errors
       }
@@ -238,6 +257,29 @@ function App() {
       </section>
 
       {header && <p className="context">{header}</p>}
+
+      {history.length > 0 && (
+        <section className="history">
+          <div className="history-head">
+            <h2>History</h2>
+            <button type="button" className="clear" onClick={() => { localStorage.removeItem(LS_HISTORY); setHistory([]) }}>Clear</button>
+          </div>
+          <div className="history-list">
+            {history.map((h) => (
+              <div key={`${h.ts}-${h.ingredients.join(',')}`} className="history-item">
+                <div className="history-info">
+                  <strong>{h.ingredients.join(', ')}</strong>
+                  <span className="muted">{new Date(h.ts).toLocaleString()} • {h.count} results</span>
+                </div>
+                <div className="history-actions">
+                  <button type="button" onClick={() => { setIngredients(h.ingredients); }}>Use</button>
+                  <button type="button" onClick={() => { setIngredients(h.ingredients); setTimeout(search, 0) }}>Run</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {meals.length > 1 && (
         <div className="sort-row">
