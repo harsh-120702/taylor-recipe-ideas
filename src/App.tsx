@@ -108,68 +108,72 @@ function App() {
 
   return (
     <div id="app">
-      <header style={{ marginBottom: 24, textAlign: 'center' }}>
-        <h1>Recipe Ideas</h1>
-        <p>Find meals Taylor can cook based on what he has and how he feels.</p>
-      </header>
+      <section className="hero">
+        <div className="hero-inner">
+          <header style={{ marginBottom: 16, textAlign: 'center' }}>
+            <h1>Recipe Ideas</h1>
+            <p>Find meals Taylor can cook based on what he has and how he feels.</p>
+          </header>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          search()
-        }}
-        className="controls"
-      >
-        <div className="ingredient-input">
-          <input
-            aria-label="Ingredient"
-            placeholder="Add ingredient (press Enter or comma)"
-            value={inputVal}
-            onChange={(e) => setInputVal(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                handleAddFromInput()
-              } else if (e.key === ',' ) {
-                e.preventDefault()
-                handleAddFromInput()
-              }
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              search()
             }}
-          />
-          <button type="button" onClick={handleAddFromInput} aria-label="Add ingredient">Add</button>
+            className="controls"
+          >
+            <div className="ingredient-input">
+              <input
+                aria-label="Ingredient"
+                placeholder="Add ingredient (press Enter or comma)"
+                value={inputVal}
+                onChange={(e) => setInputVal(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    handleAddFromInput()
+                  } else if (e.key === ',' ) {
+                    e.preventDefault()
+                    handleAddFromInput()
+                  }
+                }}
+              />
+              <button type="button" onClick={handleAddFromInput} aria-label="Add ingredient">Add</button>
+            </div>
+
+            {ingredients.length > 0 && (
+              <div className="chips" aria-label="Selected ingredients">
+                {ingredients.map((ing) => (
+                  <span key={ing} className="chip">
+                    {ing}
+                    <button type="button" className="chip-x" aria-label={`Remove ${ing}`} onClick={() => removeIngredient(ing)}>
+                      ×
+                    </button>
+                  </span>
+                ))}
+                <button type="button" className="clear" onClick={clearAll}>Clear</button>
+              </div>
+            )}
+
+            <select value={mood} onChange={(e) => setMood(e.target.value)} aria-label="Mood">
+              <option value="">Mood (optional)</option>
+              <option>Comforting</option>
+              <option>Light</option>
+              <option>Spicy</option>
+              <option>Adventurous</option>
+            </select>
+            <select value={time} onChange={(e) => setTime(e.target.value)} aria-label="Time">
+              <option value="">Time (optional)</option>
+              <option>Under 15 min</option>
+              <option>Under 30 min</option>
+              <option>Under 60 min</option>
+            </select>
+            <button type="submit" disabled={!canSearch || loading}>
+              {loading ? 'Searching…' : 'Search'}
+            </button>
+          </form>
         </div>
-
-        {ingredients.length > 0 && (
-          <div className="chips" aria-label="Selected ingredients">
-            {ingredients.map((ing) => (
-              <span key={ing} className="chip">
-                {ing}
-                <button type="button" className="chip-x" aria-label={`Remove ${ing}`} onClick={() => removeIngredient(ing)}>
-                  ×
-                </button>
-              </span>
-            ))}
-            <button type="button" className="clear" onClick={clearAll}>Clear</button>
-          </div>
-        )}
-
-        <select value={mood} onChange={(e) => setMood(e.target.value)} aria-label="Mood">
-          <option value="">Mood (optional)</option>
-          <option>Comforting</option>
-          <option>Light</option>
-          <option>Spicy</option>
-          <option>Adventurous</option>
-        </select>
-        <select value={time} onChange={(e) => setTime(e.target.value)} aria-label="Time">
-          <option value="">Time (optional)</option>
-          <option>Under 15 min</option>
-          <option>Under 30 min</option>
-          <option>Under 60 min</option>
-        </select>
-        <button type="submit" disabled={!canSearch || loading}>
-          {loading ? 'Searching…' : 'Search'}
-        </button>
-      </form>
+      </section>
 
       {header && <p className="context">{header}</p>}
 
