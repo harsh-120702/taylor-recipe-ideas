@@ -3,7 +3,10 @@ import './App.css'
 import { filterByIngredient, getMealDetails, type MealDetail, type MealListItem } from './services/mealApi'
 
 function App() {
-  const [ingredient, setIngredient] = useState('')
+  // Ingredients as a list of tokens and an input for editing
+  const [ingredients, setIngredients] = useState<string[]>([])
+  const [inputVal, setInputVal] = useState('')
+
   const [meals, setMeals] = useState<MealListItem[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selected, setSelected] = useState<MealDetail | null>(null)
@@ -11,8 +14,34 @@ function App() {
   const [error, setError] = useState<string | null>(null)
   const [mood, setMood] = useState('')
   const [time, setTime] = useState('')
+  const [sort, setSort] = useState<'name' | 'random'>('name')
 
-  const canSearch = ingredient.trim().length > 0
+  const canSearch = ingredients.length > 0
+
+
+  function handleAddFromInput() {
+    // allow comma-separated batch
+    const parts = inputVal
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean)
+    if (parts.length) {
+      setIngredients((prev) => Array.from(new Set([...prev, ...parts])))
+      setInputVal('')
+    }
+  }
+
+  function removeIngredient(i: string) {
+    setIngredients((prev) => prev.filter((x) => x !== i))
+  }
+
+  function clearAll() {
+    setIngredients([])
+    setMeals([])
+    setSelectedId(null)
+    setSelected(null)
+    setError(null)
+  }
 
   async function search() {
     if (!canSearch) return
@@ -21,10 +50,28 @@ function App() {
     setSelectedId(null)
     setSelected(null)
     try {
-      const items = await filterByIngredient(ingredient)
-      // Simple client-side heuristics based on mood/time could be added here.
-      setMeals(items)
-      if (items.length === 0) setError('No meals found. Try a different ingredient.')
+      // Query TheMealDB per-ingredient, then intersect results by id
+      const lists = await Promise.all(ingredients.map((i) => filterByIngredient(i)))
+      let result: MealListItem[] = []
+      if (lists.length === 1) {
+        result = lists[0]
+      } else {
+        result = lists.reduce<MealListItem[]>((acc, list, idx) => {
+          if (idx === 0) return list
+          const ids = new Set(list.map((m) => m.idMeal))
+          return acc.filter((m) => ids.has(m.idMeal))
+        }, [])
+      }
+
+      // Optional client-side sort
+      if (sort === 'name') {
+        result = [...result].sort((a, b) => a.strMeal.localeCompare(b.strMeal))
+      } else if (sort === 'random') {
+        result = [...result].sort(() => Math.random() - 0.5)
+      }
+
+      setMeals(result)
+      if (result.length === 0) setError('No meals found for those ingredients.')
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Something went wrong fetching meals.'
       setError(msg)
@@ -52,15 +99,15 @@ function App() {
 
   const header = useMemo(() => {
     const parts = [] as string[]
-    if (ingredient.trim()) parts.push(`Ingredient: ${ingredient.trim()}`)
+    if (ingredients.length) parts.push(`Ingredients: ${ingredients.join(', ')}`)
     if (mood) parts.push(`Mood: ${mood}`)
     if (time) parts.push(`Time: ${time}`)
     return parts.join(' • ')
-  }, [ingredient, mood, time])
+  }, [ingredients, mood, time])
 
   return (
     <div id="app">
-      <header style={{ marginBottom: 24 }}>
+      <header style={{ marginBottom: 24, textAlign: 'center' }}>
         <h1>Recipe Ideas</h1>
         <p>Find meals Taylor can cook based on what he has and how he feels.</p>
       </header>
@@ -72,12 +119,39 @@ function App() {
         }}
         className="controls"
       >
-        <input
-          aria-label="Ingredient"
-          placeholder="e.g. chicken, rice, tomato"
-          value={ingredient}
-          onChange={(e) => setIngredient(e.target.value)}
-        />
+        <div className="ingredient-input">
+          <input
+            aria-label="Ingredient"
+            placeholder="Add ingredient (press Enter or comma)"
+            value={inputVal}
+            onChange={(e) => setInputVal(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                handleAddFromInput()
+              } else if (e.key === ',' ) {
+                e.preventDefault()
+                handleAddFromInput()
+              }
+            }}
+          />
+          <button type="button" onClick={handleAddFromInput} aria-label="Add ingredient">Add</button>
+        </div>
+
+        {ingredients.length > 0 && (
+          <div className="chips" aria-label="Selected ingredients">
+            {ingredients.map((ing) => (
+              <span key={ing} className="chip">
+                {ing}
+                <button type="button" className="chip-x" aria-label={`Remove ${ing}`} onClick={() => removeIngredient(ing)}>
+                  ×
+                </button>
+              </span>
+            ))}
+            <button type="button" className="clear" onClick={clearAll}>Clear</button>
+          </div>
+        )}
+
         <select value={mood} onChange={(e) => setMood(e.target.value)} aria-label="Mood">
           <option value="">Mood (optional)</option>
           <option>Comforting</option>
@@ -90,6 +164,10 @@ function App() {
           <option>Under 15 min</option>
           <option>Under 30 min</option>
           <option>Under 60 min</option>
+        </select>
+        <select value={sort} onChange={(e) => setSort(e.target.value as 'name' | 'random')} aria-label="Sort">
+          <option value="name">Sort: A → Z</option>
+          <option value="random">Sort: Random</option>
         </select>
         <button type="submit" disabled={!canSearch || loading}>
           {loading ? 'Searching…' : 'Search'}
