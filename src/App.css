@@ -1,0 +1,106 @@
+#app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+header h1 {
+  margin: 0 0 0.25rem 0;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 180px 180px auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+.controls input,
+.controls select {
+  padding: 0.6em 0.8em;
+  border-radius: 8px;
+  border: 1px solid #3a3a3a;
+  background: #1a1a1a;
+}
+.controls button {
+  height: 100%;
+}
+
+.context {
+  opacity: 0.8;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.error {
+  color: #ff6b6b;
+  background: #3a1e1e;
+  border: 1px solid #5e2a2a;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 2rem;
+}
+.card {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.card-btn {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 0;
+}
+.card img {
+  display: block;
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+.card h3 {
+  margin: 0;
+  padding: 0.75rem 0.8rem 1rem;
+  font-size: 1rem;
+}
+.card.active {
+  outline: 2px solid #646cff;
+}
+
+.details {
+  border-top: 1px solid #2a2a2a;
+  padding-top: 1rem;
+}
+.details .sub {
+  opacity: 0.8;
+  margin-top: -0.5rem;
+}
+.details-body {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+.details-body img {
+  width: 100%;
+  border-radius: 8px;
+}
+.links a {
+  margin-right: 1rem;
+}
+.footer {
+  margin-top: 2rem;
+  opacity: 0.7;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .controls { grid-template-columns: 1fr; }
+  .details-body { grid-template-columns: 1fr; }
+}
