@@ -2,6 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { filterByIngredient, getMealDetails, type MealDetail, type MealListItem } from './services/mealApi'
 
+const LS_LAST = 'tri:last'
+const LS_SETS = 'tri:sets'
+
+type StoredLast = { ingredients: string[]; results: MealListItem[] }
+
 function App() {
   // Ingredients as a list of tokens and an input for editing
   const [ingredients, setIngredients] = useState<string[]>([])
@@ -16,6 +21,10 @@ function App() {
   const [time, setTime] = useState('')
   const [sort, setSort] = useState<'name' | 'random'>('name')
 
+  // Suggestions and recent ingredient sets from previous sessions
+  const [suggestions, setSuggestions] = useState<MealListItem[]>([])
+  const [recentSets, setRecentSets] = useState<string[][]>([])
+
   const canSearch = ingredients.length > 0
 
   function applySort(list: MealListItem[]) {
@@ -23,6 +32,24 @@ function App() {
     if (sort === 'random') return [...list].sort(() => Math.random() - 0.5)
     return list
   }
+
+  // Load cached suggestions on first mount
+  useEffect(() => {
+    try {
+      const rawLast = localStorage.getItem(LS_LAST)
+      if (rawLast) {
+        const parsed = JSON.parse(rawLast) as StoredLast
+        if (Array.isArray(parsed?.results)) setSuggestions(parsed.results)
+      }
+      const rawSets = localStorage.getItem(LS_SETS)
+      if (rawSets) {
+        const sets = JSON.parse(rawSets) as string[][]
+        if (Array.isArray(sets)) setRecentSets(sets)
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [])
 
 
   function handleAddFromInput() {
@@ -72,6 +99,24 @@ function App() {
       // Sort before showing
       result = applySort(result)
       setMeals(result)
+
+      // Persist last results and update recent sets (max 5)
+      try {
+        const payload: StoredLast = { ingredients, results: result.slice(0, 24) }
+        localStorage.setItem(LS_LAST, JSON.stringify(payload))
+
+        const nextSets = (() => {
+          const joined = ingredients.join(', ')
+          const combined = [ingredients, ...recentSets.filter((s) => s.join(', ') !== joined)]
+          return combined.slice(0, 5)
+        })()
+        localStorage.setItem(LS_SETS, JSON.stringify(nextSets))
+        setRecentSets(nextSets)
+        setSuggestions(payload.results)
+      } catch {
+        // ignore storage errors
+      }
+
       if (result.length === 0) setError('No meals found for those ingredients.')
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Something went wrong fetching meals.'
@@ -141,19 +186,36 @@ function App() {
               <button type="button" onClick={handleAddFromInput} aria-label="Add ingredient">Add</button>
             </div>
 
-            {ingredients.length > 0 && (
-              <div className="chips" aria-label="Selected ingredients">
-                {ingredients.map((ing) => (
-                  <span key={ing} className="chip">
-                    {ing}
-                    <button type="button" className="chip-x" aria-label={`Remove ${ing}`} onClick={() => removeIngredient(ing)}>
-                      ×
-                    </button>
-                  </span>
-                ))}
-                <button type="button" className="clear" onClick={clearAll}>Clear</button>
-              </div>
-            )}
+        {ingredients.length > 0 && (
+          <div className="chips" aria-label="Selected ingredients">
+            {ingredients.map((ing) => (
+              <span key={ing} className="chip">
+                {ing}
+                <button type="button" className="chip-x" aria-label={`Remove ${ing}`} onClick={() => removeIngredient(ing)}>
+                  ×
+                </button>
+              </span>
+            ))}
+            <button type="button" className="clear" onClick={clearAll}>Clear</button>
+          </div>
+        )}
+
+        {recentSets.length > 0 && (
+          <div className="recent-sets" aria-label="Recent ingredient sets">
+            <span className="hint">Recent:</span>
+            {recentSets.map((set) => (
+              <button
+                type="button"
+                key={set.join(',')}
+                className="recent-chip"
+                onClick={() => setIngredients(set)}
+                title={`Use: ${set.join(', ')}`}
+              >
+                {set.join(', ')}
+              </button>
+            ))}
+          </div>
+        )}
 
             <select value={mood} onChange={(e) => setMood(e.target.value)} aria-label="Mood">
               <option value="">Mood (optional)</option>
@@ -197,6 +259,22 @@ function App() {
       )}
 
       {error && <div className="error">{error}</div>}
+
+      {meals.length === 0 && suggestions.length > 0 && (
+        <section className="suggest">
+          <h2>Suggestions</h2>
+          <div className="grid">
+            {suggestions.map((m) => (
+              <article key={m.idMeal} className={`card ${selectedId === m.idMeal ? 'active' : ''}`}>
+                <button className="card-btn" onClick={() => setSelectedId(m.idMeal)}>
+                  <img src={m.strMealThumb} alt={m.strMeal} />
+                  <h3>{m.strMeal}</h3>
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="grid">
         {meals.map((m) => (

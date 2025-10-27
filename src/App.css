@@ -144,9 +144,14 @@ header p { color: var(--muted); }
 }
 .links a:hover { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
 
-.footer { margin-top: 2rem; color: var(--muted); text-align: center; }
+.recent-sets { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; grid-column: 1 / -1; margin-top: 0.25rem; }
+.recent-sets .hint { color: var(--muted); font-size: 0.9rem; margin-right: 0.25rem; }
+.recent-chip { background: transparent; border: 1px dashed var(--border); color: var(--text); padding: 0.35rem 0.6rem; border-radius: 999px; }
+.recent-chip:hover { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
 
-.sort-row { display: flex; justify-content: flex-end; margin: 0.25rem 0 0.75rem; }
+.suggest h2 { margin: 1rem 0 0.5rem; }
+
+.footer { margin-top: 2rem; color: var(--muted); text-align: center; }
 
 @media (max-width: 900px) {
   .controls { grid-template-columns: 1fr 1fr minmax(140px, 1fr) auto; }
