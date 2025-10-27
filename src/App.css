@@ -115,6 +115,8 @@ header p { color: var(--muted); }
 
 .footer { margin-top: 2rem; color: var(--muted); text-align: center; }
 
+.sort-row { display: flex; justify-content: flex-end; margin: 0.25rem 0 0.75rem; }
+
 @media (max-width: 900px) {
   .controls { grid-template-columns: 1fr 1fr minmax(140px, 1fr) auto; }
 }

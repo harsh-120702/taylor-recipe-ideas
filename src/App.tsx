@@ -18,6 +18,12 @@ function App() {
 
   const canSearch = ingredients.length > 0
 
+  function applySort(list: MealListItem[]) {
+    if (sort === 'name') return [...list].sort((a, b) => a.strMeal.localeCompare(b.strMeal))
+    if (sort === 'random') return [...list].sort(() => Math.random() - 0.5)
+    return list
+  }
+
 
   function handleAddFromInput() {
     // allow comma-separated batch
@@ -63,13 +69,8 @@ function App() {
         }, [])
       }
 
-      // Optional client-side sort
-      if (sort === 'name') {
-        result = [...result].sort((a, b) => a.strMeal.localeCompare(b.strMeal))
-      } else if (sort === 'random') {
-        result = [...result].sort(() => Math.random() - 0.5)
-      }
-
+      // Sort before showing
+      result = applySort(result)
       setMeals(result)
       if (result.length === 0) setError('No meals found for those ingredients.')
     } catch (e) {
@@ -165,16 +166,31 @@ function App() {
           <option>Under 30 min</option>
           <option>Under 60 min</option>
         </select>
-        <select value={sort} onChange={(e) => setSort(e.target.value as 'name' | 'random')} aria-label="Sort">
-          <option value="name">Sort: A → Z</option>
-          <option value="random">Sort: Random</option>
-        </select>
         <button type="submit" disabled={!canSearch || loading}>
           {loading ? 'Searching…' : 'Search'}
         </button>
       </form>
 
       {header && <p className="context">{header}</p>}
+
+      {meals.length > 1 && (
+        <div className="sort-row">
+          <label htmlFor="sort" className="visually-hidden">Sort results</label>
+          <select
+            id="sort"
+            value={sort}
+            onChange={(e) => {
+              const v = e.target.value as 'name' | 'random'
+              setSort(v)
+              setMeals((prev) => applySort(prev))
+            }}
+            aria-label="Sort results"
+          >
+            <option value="name">Sort: A → Z</option>
+            <option value="random">Sort: Random</option>
+          </select>
+        </div>
+      )}
 
       {error && <div className="error">{error}</div>}
 
