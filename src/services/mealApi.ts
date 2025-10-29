@@ -22,6 +22,14 @@ export async function filterByIngredient(ingredient: string): Promise<MealListIt
   return data.meals ?? []
 }
 
+export async function filterByCategory(category: string): Promise<MealListItem[]> {
+  const url = `${API_BASE}/filter.php?c=${encodeURIComponent(category.trim())}`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Network error: ${res.status}`)
+  const data = await res.json()
+  return data.meals ?? []
+}
+
 export async function getMealDetails(id: string): Promise<MealDetail | null> {
   const url = `${API_BASE}/lookup.php?i=${encodeURIComponent(id)}`
   const res = await fetch(url)
