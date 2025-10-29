@@ -21,7 +21,7 @@ const HistoryPanel: React.FC = () => {
         {history.map((h) => (
           <button
             key={`${h.ts}-${h.label}`}
-            className="w-full text-left rounded-md border border-slate-200/60 dark:border-slate-800/60 p-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
+            className="w-full text-left rounded-lg ring-1 ring-slate-200/50 dark:ring-slate-800/60 p-2 text-sm hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
             onClick={async () => {
               if (h.kind === 'category') { setCategory(h.label); await fetchByCategory(h.label) }
             }}

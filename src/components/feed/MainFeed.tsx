@@ -11,7 +11,7 @@ const MainFeed: React.FC = () => {
   return (
     <section className="min-h-full p-4">
       <div className="max-w-5xl mx-auto space-y-4">
-        <header className="px-4 pt-4 pb-2 bg-gradient-to-b from-slate-100/60 to-transparent dark:from-slate-900/30 rounded-md">
+        <header className="px-4 pt-4 pb-2 bg-gradient-to-b from-slate-100/50 to-transparent dark:from-slate-900/20 rounded-xl">
           <h1 className="text-xl font-semibold">{selectedCategory ? selectedCategory : 'Main Feed Area'}</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
             {selectedCategory ? 'Showing recipes for the selected category.' : 'Pick a category from the left to load recipes.'}
@@ -29,7 +29,7 @@ const MainFeed: React.FC = () => {
         {!loading && !error && results && results.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {results.map((m) => (
-              <div key={m.idMeal} className="rounded-md border border-slate-200/60 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/40 overflow-hidden">
+              <div key={m.idMeal} className="rounded-xl ring-1 ring-slate-200/50 dark:ring-slate-800/60 bg-white/70 dark:bg-slate-900/30 overflow-hidden transition-shadow hover:shadow-sm">
                 <button className="block w-full text-left" onClick={() => addHistoryMeal(m)}>
                   <img src={m.strMealThumb} alt={m.strMeal} className="w-full aspect-[4/3] object-cover" />
                 </button>

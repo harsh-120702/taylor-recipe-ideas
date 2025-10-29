@@ -10,8 +10,10 @@ const NavItem: React.FC<Props> = ({ label, active, onClick }) => {
       type="button"
       onClick={onClick}
       className={[
-        'group text-left px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500',
-        active ? 'bg-violet-600/10 text-violet-700 dark:text-violet-300 font-semibold' : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+        'group text-left px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors',
+        active
+          ? 'bg-violet-600/10 text-violet-700 dark:text-violet-300 font-semibold border-l-2 border-violet-500'
+          : 'hover:bg-slate-100/60 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
       ].join(' ')}
       aria-current={active ? 'page' : undefined}
       aria-label={label}
