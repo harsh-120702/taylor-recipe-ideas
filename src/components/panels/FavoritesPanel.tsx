@@ -18,7 +18,7 @@ const FavoritesPanel: React.FC = () => {
         {favorites.map((m) => (
           <div key={m.idMeal} className="flex items-center gap-2 rounded-lg ring-1 ring-slate-200/50 dark:ring-slate-800/60 p-2 text-sm bg-white/60 dark:bg-slate-900/30">
             <button onClick={() => showRecipe(m)} className="flex items-center gap-2 flex-1 text-left hover:underline">
-              <img src={m.strMealThumb} alt={m.strMeal} className="w-10 h-10 rounded object-cover" />
+              <img src={m.strMealThumb} alt={m.strMeal} loading="lazy" className="w-10 h-10 rounded object-cover" />
               <span className="font-medium truncate">{m.strMeal}</span>
             </button>
             <button aria-label="Remove favourite" className="text-xs px-2 py-1 rounded border border-slate-200/60 dark:border-slate-800/60" onClick={() => removeFavorite(m.idMeal)}>×</button>
