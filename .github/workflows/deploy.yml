@@ -29,6 +29,8 @@ jobs:
         run: npm ci
       - name: Type check
         run: npx tsc -b
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
       - name: Build site
         run: npx vite build --base=/taylor-recipe-ideas/
       - name: Upload artifact
